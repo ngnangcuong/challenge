@@ -8,6 +8,8 @@ import (
 	"challenge3/api/post"
 	"challenge3/database"
 	"challenge3/middleware"
+	repo "challenge3/repository"
+	"challenge3/usecase"
 )
 
 func NewOpenAPIMiddleware() gin.HandlerFunc {
@@ -17,6 +19,16 @@ func NewOpenAPIMiddleware() gin.HandlerFunc {
 
 func InitRoute(router *gin.Engine) {
 	validator := NewOpenAPIMiddleware()
+
+	connection := database.GetDatabase()
+	userRepo := repo.NewUserRepo(connection)
+	userService := usecase.NewUserService(userRepo)
+
+	postRepo := repo.NewPostRepo(connection)
+	postService := usecase.NewPostService(postRepo)
+
+	roleRepo := repo.NewRoleRepo(connection)
+	roleService := usecase.NewRoleService(roleRepo)
 	
 	userRoute := router.Group("/user")
 	{
@@ -25,13 +37,13 @@ func InitRoute(router *gin.Engine) {
 
 		userRoute.POST("/login", user.LogIn)
 		userRoute.GET("/logout", user.LogOut)
-		userRoute.POST("/register", user.Register)
-		userRoute.POST("/create-user", middleware.NeedPermission("c"), user.CreateUser)
-		userRoute.DELETE("/delete-user/:userEmail", middleware.NeedPermission("d"), user.DeleteUser)
-		userRoute.PATCH("/update-user/:userEmail", middleware.NeedPermission("u"), user.UpdateUser)
-		userRoute.PUT("/change-role", middleware.NeedRole("admin"), user.ChangeRole)
-		userRoute.POST("/new-role", middleware.NeedRole("admin"), user.NewRole)
-		userRoute.GET("/", user.GetListUser)
+		userRoute.POST("/register", user.Register(userService))
+		userRoute.POST("/create-user", middleware.NeedPermission("c"), user.CreateUser(userService))
+		userRoute.DELETE("/delete-user/:userEmail", middleware.NeedPermission("d"), user.DeleteUser(userService))
+		userRoute.PATCH("/update-user/:userEmail", middleware.NeedPermission("u"), user.UpdateUser(userService))
+		userRoute.PUT("/change-role", middleware.NeedRole("admin"), user.ChangeRole(userService, roleService))
+		userRoute.POST("/new-role", middleware.NeedRole("admin"), user.NewRole(roleService))
+		userRoute.GET("/", user.GetListUser(userService))
 	}
 
 	postRoute := router.Group("/post")
@@ -39,10 +51,10 @@ func InitRoute(router *gin.Engine) {
 		postRoute.Use(validator)
 		postRoute.Use(middleware.Authorized())
 
-		postRoute.POST("/create", post.CreatePost)
-		postRoute.DELETE("/delete/:postID", post.DeletePost)
-		postRoute.PUT("/update/:postID", post.UpdatePost)
-		postRoute.GET("/", post.GetListPost)
+		postRoute.POST("/create", post.CreatePost(postService))
+		postRoute.DELETE("/delete/:postID", post.DeletePost(postService))
+		postRoute.PUT("/update/:postID", post.UpdatePost(postService))
+		postRoute.GET("/", post.GetListPost(postService))
 	}
 }
 

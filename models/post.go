@@ -15,7 +15,7 @@ type Post struct {
 type PostRepo interface {
 	Select() ([]Post, error)
 	Delete(id uint) (error)
-	Update(id uint, content string)	(error)
+	Update(post Post)	(error)
 	Create(post Post) (error)
 	Find(id uint) (Post, error)
 }

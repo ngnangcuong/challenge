@@ -27,24 +27,12 @@ func (p *postRepoImpl) Select() ([]models.Post, error) {
 }
 
 func (p *postRepoImpl) Delete(id uint) (error) {
-	post, err := p.Find(id)
-
-	if err != nil {
-		return err
-	}
-
+	post, _ := p.Find(id)
 	result := p.DB.Delete(&post)
 	return result.Error
 }
 
-func (p *postRepoImpl) Update(id uint, content string)	(error) {
-	post, err := p.Find(id)
-
-	if err != nil {
-		return err
-	}
-
-	post.Content = content
+func (p *postRepoImpl) Update(post models.Post)	(error) {
 	result := p.DB.Save(&post)
 	return result.Error
 }
