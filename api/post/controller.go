@@ -11,7 +11,7 @@ import (
 	"challenge3/usecase"
 )
 
-func GetListPost(postService usecase.PostService) func(c *gin.Context) {
+func GetListPost(postService *usecase.PostService) func(c *gin.Context) {
 	return func(c *gin.Context) {
 
 		if isLogin := c.MustGet("isLogin").(bool); !isLogin {
@@ -49,7 +49,7 @@ func GetListPost(postService usecase.PostService) func(c *gin.Context) {
 	
 }
 
-func CreatePost(postService usecase.PostService) func(c *gin.Context) {
+func CreatePost(postService *usecase.PostService) func(c *gin.Context) {
 	return func(c *gin.Context) {
 	
 		if isLogin := c.MustGet("isLogin").(bool); !isLogin {
@@ -76,20 +76,29 @@ func CreatePost(postService usecase.PostService) func(c *gin.Context) {
 	}
 }
 
-func UpdatePost(postService usecase.PostService) func(c *gin.Context) {
+func UpdatePost(postService *usecase.PostService) func(c *gin.Context) {
 	return func(c *gin.Context) {
+
+		flag.Parse()
+		_ = flag.Arg(0)
 
 		if check := c.MustGet("isLogin").(bool); !check {
 			c.JSON(200, gin.H{
 				"message": "Not log in yet",
 			})
+			return
 		}
 	
 		role := c.MustGet("role").(string)
-		postID := c.Param("postID")
+		postID1 := c.Param("postID")
 		userID := c.MustGet("userID")
+		postID, err := strconv.ParseUint(postID1, 10, 32)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 	
-		postCheck, err := postService.Find(uint(postID.(float64)))   
+		postCheck, err := postService.Find(uint(postID))
 		if err != nil {
 			c.JSON(200, gin.H{
 				"message": "Does not exist post",
@@ -113,7 +122,7 @@ func UpdatePost(postService usecase.PostService) func(c *gin.Context) {
 	}
 }
 
-func DeletePost(postService usecase.PostService) func(c *gin.Context) {
+func DeletePost(postService *usecase.PostService) func(c *gin.Context) {
 	return func(c *gin.Context) {
 	
 		if check := c.MustGet("isLogin").(bool); !check {
@@ -123,10 +132,15 @@ func DeletePost(postService usecase.PostService) func(c *gin.Context) {
 		}
 		
 		role := c.MustGet("role").(string)
-		postID := c.Param("postID")
+		postID1 := c.Param("postID")
 		userID := c.MustGet("userID")
+		postID, err := strconv.ParseUint(postID1, 10, 32)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 
-		postCheck, err := postService.Find(uint(postID.(float64)))
+		postCheck, err := postService.Find(uint(postID))
 		if err != nil {
 			c.JSON(200, gin.H{
 				"message": "Does not exist post",
@@ -141,7 +155,7 @@ func DeletePost(postService usecase.PostService) func(c *gin.Context) {
 			return
 		}
 	
-		postService.DeletePost((uint(postID.(float64))))
+		postService.DeletePost(uint(postID))
 		c.JSON(200, gin.H{
 			"message": "Delete post successfully",
 		})

@@ -42,7 +42,7 @@ func GenerateJWT(userAuth *models.User) (string, error) {
 	return tokenString, nil
 }
 
-func GetListUser(userService usecase.UserService) func(c *gin.Context) {
+func GetListUser(userService *usecase.UserService) func(c *gin.Context) {
 	return func(c *gin.Context) {
 	
 		if check := c.MustGet("isLogin").(bool); !check {
@@ -99,7 +99,7 @@ func LogOut(c *gin.Context) {
 	Response(c, 200, "Successful log out")
 }
 
-func Register(userService usecase.UserService) func(c *gin.Context) {
+func Register(userService *usecase.UserService) func(c *gin.Context) {
 	return func(c *gin.Context) {
 	
 		email := c.PostForm("email")
@@ -124,7 +124,7 @@ func Register(userService usecase.UserService) func(c *gin.Context) {
 	}
 }
 
-func CreateUser(userService usecase.UserService) func(c *gin.Context) {
+func CreateUser(userService *usecase.UserService) func(c *gin.Context) {
 	return func(c *gin.Context) {	
 		if check := c.MustGet("isLogin").(bool); !check {
 			c.JSON(200, gin.H{
@@ -154,7 +154,7 @@ func CreateUser(userService usecase.UserService) func(c *gin.Context) {
 	}
 }
 
-func DeleteUser(userService usecase.UserService) func(c *gin.Context) {
+func DeleteUser(userService *usecase.UserService) func(c *gin.Context) {
 	return func(c *gin.Context) {
 	
 		if check := c.MustGet("isLogin").(bool); !check {
@@ -183,7 +183,7 @@ func DeleteUser(userService usecase.UserService) func(c *gin.Context) {
 	}
 }
 
-func UpdateUser(userService usecase.UserService) func(c *gin.Context) {
+func UpdateUser(userService *usecase.UserService) func(c *gin.Context) {
 	return func(c *gin.Context) {
 	
 		if check := c.MustGet("isLogin").(bool); !check {
@@ -217,7 +217,7 @@ func UpdateUser(userService usecase.UserService) func(c *gin.Context) {
 
 }
 
-func NewRole(roleService usecase.RoleService) func(c *gin.Context) {
+func NewRole(roleService *usecase.RoleService) func(c *gin.Context) {
 	return func(c *gin.Context) {
 	
 		if check := c.MustGet("isLogin").(bool); !check {
@@ -246,7 +246,7 @@ func NewRole(roleService usecase.RoleService) func(c *gin.Context) {
 	}
 }
 
-func ChangeRole(userService usecase.UserService, roleService usecase.RoleService) func(c *gin.Context) {
+func ChangeRole(userService *usecase.UserService, roleService *usecase.RoleService) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		connection := database.GetDatabase()
 		if check := c.MustGet("isLogin").(bool); !check {

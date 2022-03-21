@@ -8,7 +8,7 @@ type UserService struct {
 	repo models.UserRepo
 }
 
-func NewUserUseCase(repo models.UserRepo) *UserService {
+func NewUserService(repo models.UserRepo) *UserService {
 	return &UserService{
 		repo: repo,
 	}
