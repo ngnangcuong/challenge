@@ -89,7 +89,7 @@ func UpdatePost(postService usecase.PostService) func(c *gin.Context) {
 		postID := c.Param("postID")
 		userID := c.MustGet("userID")
 	
-		postCheck, err := postService.Find(uint(postID.(float64)))
+		postCheck, err := postService.Find(uint(postID.(float64)))   
 		if err != nil {
 			c.JSON(200, gin.H{
 				"message": "Does not exist post",
