@@ -13,13 +13,6 @@ import (
 
 func GetListPost(postService *usecase.PostService) func(c *gin.Context) {
 	return func(c *gin.Context) {
-
-		if isLogin := c.MustGet("isLogin").(bool); !isLogin {
-			c.JSON(200, gin.H{
-				"message": "Not log in yet",
-			})
-			return
-		}
 	
 		flag.Parse()
 		_ = flag.Arg(0)
@@ -52,13 +45,6 @@ func GetListPost(postService *usecase.PostService) func(c *gin.Context) {
 func CreatePost(postService *usecase.PostService) func(c *gin.Context) {
 	return func(c *gin.Context) {
 	
-		if isLogin := c.MustGet("isLogin").(bool); !isLogin {
-			c.JSON(200, gin.H{
-				"message": "Not log in yet",
-			})
-			return
-		}
-	
 		userID := c.MustGet("userID")
 		email := c.MustGet("email")
 	
@@ -81,13 +67,6 @@ func UpdatePost(postService *usecase.PostService) func(c *gin.Context) {
 
 		flag.Parse()
 		_ = flag.Arg(0)
-
-		if check := c.MustGet("isLogin").(bool); !check {
-			c.JSON(200, gin.H{
-				"message": "Not log in yet",
-			})
-			return
-		}
 	
 		role := c.MustGet("role").(string)
 		postID1 := c.Param("postID")
@@ -124,12 +103,6 @@ func UpdatePost(postService *usecase.PostService) func(c *gin.Context) {
 
 func DeletePost(postService *usecase.PostService) func(c *gin.Context) {
 	return func(c *gin.Context) {
-	
-		if check := c.MustGet("isLogin").(bool); !check {
-			c.JSON(200, gin.H{
-				"message": "Not log in yet",
-			})
-		}
 		
 		role := c.MustGet("role").(string)
 		postID1 := c.Param("postID")

@@ -45,13 +45,6 @@ func GenerateJWT(userAuth *models.User) (string, error) {
 func GetListUser(userService *usecase.UserService) func(c *gin.Context) {
 	return func(c *gin.Context) {
 	
-		if check := c.MustGet("isLogin").(bool); !check {
-			c.JSON(200, gin.H{
-				"message": "Not Log in yet",
-			})
-			return
-		}
-	
 		userList, err := userService.GetListUser()
 	
 		if err != nil {
@@ -126,19 +119,6 @@ func Register(userService *usecase.UserService) func(c *gin.Context) {
 
 func CreateUser(userService *usecase.UserService) func(c *gin.Context) {
 	return func(c *gin.Context) {	
-		if check := c.MustGet("isLogin").(bool); !check {
-			c.JSON(200, gin.H{
-				"message": "Not Log in yet",
-			})
-			return
-		}
-	
-		if permit := c.MustGet("Permission").(bool); !permit {
-			c.JSON(401, gin.H{
-				"message": "Not Authorized",
-			})
-			return
-		}
 	
 		password := c.PostForm("password")
 		hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), 14)
@@ -157,20 +137,6 @@ func CreateUser(userService *usecase.UserService) func(c *gin.Context) {
 func DeleteUser(userService *usecase.UserService) func(c *gin.Context) {
 	return func(c *gin.Context) {
 	
-		if check := c.MustGet("isLogin").(bool); !check {
-			c.JSON(200, gin.H{
-				"message": "Not Log in yet",
-			})
-			return
-		}
-	
-		if permit := c.MustGet("Permission").(bool); !permit {
-			c.JSON(401, gin.H{
-				"message": "Not Authorized",
-			})
-			return
-		}
-	
 		email := c.Param("userEmail")
 	
 		err := userService.DeleteUser(email)
@@ -185,20 +151,6 @@ func DeleteUser(userService *usecase.UserService) func(c *gin.Context) {
 
 func UpdateUser(userService *usecase.UserService) func(c *gin.Context) {
 	return func(c *gin.Context) {
-	
-		if check := c.MustGet("isLogin").(bool); !check {
-			c.JSON(200, gin.H{
-				"message": "Not Log in yet",
-			})
-			return
-		}
-	
-		if permit := c.MustGet("Permission").(bool); !permit {
-			c.JSON(401, gin.H{
-				"message": "Not Authorized",
-			})
-			return
-		}
 	
 		var user = models.User{
 			Email: c.Param("userEmail"),
@@ -220,18 +172,6 @@ func UpdateUser(userService *usecase.UserService) func(c *gin.Context) {
 func NewRole(roleService *usecase.RoleService) func(c *gin.Context) {
 	return func(c *gin.Context) {
 	
-		if check := c.MustGet("isLogin").(bool); !check {
-			Response(c, 200, "Not Log in yet")
-			return
-		}
-	
-		if permit := c.MustGet("Permission").(bool); !permit {
-			c.JSON(401, gin.H{
-				"message": "Not Authorized",
-			})
-			return
-		}
-	
 		name := c.PostForm("name")
 		permission := c.PostForm("permission")
 	
@@ -249,17 +189,6 @@ func NewRole(roleService *usecase.RoleService) func(c *gin.Context) {
 func ChangeRole(userService *usecase.UserService, roleService *usecase.RoleService) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		connection := database.GetDatabase()
-		if check := c.MustGet("isLogin").(bool); !check {
-			Response(c, 200, "Not Log in yet")
-			return
-		}
-	
-		if permit := c.MustGet("Permission").(bool); !permit {
-			c.JSON(401, gin.H{
-				"message": "Not Authorized",
-			})
-			return
-		}
 	
 		email := c.PostForm("email")
 		role := c.PostForm("role")

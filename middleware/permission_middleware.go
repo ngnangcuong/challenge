@@ -16,15 +16,14 @@ func NeedPermission(permit string) gin.HandlerFunc {
 
 		permission, _ := roleRepo.Find(role.(string))
 
-		// var permission models.Role
-		// connection.Where("name = ?", role.(string)).First(&permission)
-
 		if ok := strings.Contains(permission.Permission, permit); !ok {
-			c.Set("Permission", false)
+
+			c.AbortWithStatusJSON(401, gin.H{
+				"message": "Not Authorized",
+			})
 			return
-			c.Next()
 		}
-		c.Set("Permission", true)
+
 		c.Next()
 	}
 }
@@ -33,11 +32,12 @@ func NeedRole(role string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		roleCheck := c.MustGet("role").(string)
 		if role != roleCheck {
-			c.Set("Permission", false)
+			c.AbortWithStatusJSON(401, gin.H{
+				"message": "Not Authorized",
+			})
 			return
-			c.Next()
 		}
-		c.Set("Permission", true)
+		
 		c.Next()
 	}
 }

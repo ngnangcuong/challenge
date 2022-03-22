@@ -29,15 +29,16 @@ func InitRoute(router *gin.Engine) {
 
 	roleRepo := repo.NewRoleRepo(connection)
 	roleService := usecase.NewRoleService(roleRepo)
+
+	router.POST("/user/login", user.LogIn)
+	router.GET("/user/logout", user.LogOut)
+	router.POST("/user/register", user.Register(userService))
 	
 	userRoute := router.Group("/user")
 	{
 		userRoute.Use(validator)
 		userRoute.Use(middleware.Authorized())
 
-		userRoute.POST("/login", user.LogIn)
-		userRoute.GET("/logout", user.LogOut)
-		userRoute.POST("/register", user.Register(userService))
 		userRoute.POST("/create-user", middleware.NeedPermission("c"), user.CreateUser(userService))
 		userRoute.DELETE("/delete-user/:userEmail", middleware.NeedPermission("d"), user.DeleteUser(userService))
 		userRoute.PATCH("/update-user/:userEmail", middleware.NeedPermission("u"), user.UpdateUser(userService))

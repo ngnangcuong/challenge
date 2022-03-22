@@ -13,16 +13,12 @@ func Authorized() gin.HandlerFunc {
 		// tokenString, err := c.Cookie("token")
 		authentication := c.Request.Header["Authorization"]
 		if len(authentication) < 1 {
-			c.Set("isLogin", false)
+			c.AbortWithStatusJSON(401, gin.H{
+				"message": "Not log in yet",
+			})
 			return
-			c.Next()
 		}
 		tokenString := strings.Split(authentication[0], " ")[1]
-		// if err != nil {
-		// 	c.Set("isLogin", false)
-		// 	return
-		// 	c.Next()
-		// } 
 			
 		var mySigningKey = []byte("pa$$w0rd")
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error){
@@ -33,9 +29,10 @@ func Authorized() gin.HandlerFunc {
 		})
 	
 		if err != nil {
-			c.Set("isLogin", false)
+			c.AbortWithStatusJSON(401, gin.H{
+				"message": "Not log in yet",
+			})
 			return
-			c.Next()
 		} else {
 			if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 				c.Set("isLogin", true)
