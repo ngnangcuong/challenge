@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"challenge3/models"
+	"fmt"
 )
 
 type UserService struct {
@@ -19,6 +20,11 @@ func (u *UserService) FindUser(email string) (models.User, error) {
 }
 
 func (u *UserService) CreateUser(email, name, password string) (models.User, error) {
+	us, _ := u.FindUser(email)
+	if us.Email != "" {
+		return models.User{}, fmt.Errorf("Existed User")
+	}
+
 	var user = models.User{
 		Email: email,
 		Name: name,
@@ -48,10 +54,12 @@ func (u *UserService) DeleteUser(email string) (error) {
 }
 
 func (u *UserService) UpdateUser(user models.User) (error) {
-	user, err := u.repo.Find(user.Email)
+	userAuth, err := u.repo.Find(user.Email)
 	if err != nil {
 		return err
 	}
+	userAuth.Password = user.Password
+	userAuth.Name = user.Name
 
-	return u.repo.Update(user)
+	return u.repo.Update(userAuth)
 }

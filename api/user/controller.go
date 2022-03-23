@@ -98,21 +98,20 @@ func Register(userService *usecase.UserService) func(c *gin.Context) {
 		email := c.PostForm("email")
 		name := c.PostForm("name")
 		password := c.PostForm("password")
-	
-		userCheck, _ := userService.FindUser(email)
-		if userCheck.Email != "" {
-			Response(c, 200, "Email is already existed")
-			return
-		}
-	
 		hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	
 		if err != nil {
 			Response(c, 200, "Cannot generate hash password")
 			return
 		}
-	
-		userService.CreateUser(email, name, string(hashPassword))
+
+		// userCheck, _ := userService.FindUser(email)
+		
+		_, err = userService.CreateUser(email, name, string(hashPassword))
+		if err != nil {
+			Response(c, 200, "Email is already existed")
+			return
+		}
 		Response(c, 200, "Create user successfully")
 	}
 }
@@ -128,8 +127,12 @@ func CreateUser(userService *usecase.UserService) func(c *gin.Context) {
 			return
 		}
 	
-		userService.CreateUser(c.PostForm("email"), c.PostForm("name"), string(hashPassword))
-	
+		_, err = userService.CreateUser(c.PostForm("email"), c.PostForm("name"), string(hashPassword))
+		if err != nil {
+			Response(c, 200, "Email is already existed")
+			return
+		}
+
 		Response(c, 200, "Create user successfully")
 	}
 }
@@ -175,13 +178,14 @@ func NewRole(roleService *usecase.RoleService) func(c *gin.Context) {
 		name := c.PostForm("name")
 		permission := c.PostForm("permission")
 	
-		roleCheck, _ := roleService.Find(name)
-		if roleCheck.Name != "" {
+		// roleCheck, _ := roleService.Find(name)
+		
+		err := roleService.Create(name, permission)
+		if err != nil {
 			Response(c, 200, "This role is available")
 			return
 		}
-	
-		roleService.Create(name, permission)
+
 		Response(c, 200, "Create role successfully")
 	}
 }

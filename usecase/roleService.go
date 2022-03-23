@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"challenge3/models"
-
+	"fmt"
 )
 
 type RoleService struct {
@@ -21,6 +21,11 @@ func (r *RoleService) Find(name string) (models.Role, error) {
 }
 
 func (r *RoleService) Create(name, permission string) (error) {
+	roleCheck, _ := r.Find(name)
+	if roleCheck.Name != "" {
+		return fmt.Errorf("Existed Role")
+	}
+
 	var role = models.Role{
 		Name: name,
 		Permission: permission,

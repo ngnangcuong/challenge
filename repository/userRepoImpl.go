@@ -33,15 +33,8 @@ func (u *userRepoImpl) Insert(user models.User) (error) {
 }
 
 func (u *userRepoImpl) Update(user models.User) (error) {
-	userAuth, err := u.Find(user.Email)
-	if err != nil {
-		return err
-	}
 
-	userAuth.Name = user.Name
-	userAuth.Role = user.Role
-
-	result := u.DB.Save(&userAuth)
+	result := u.DB.Save(&user)
 
 	return result.Error
 }
