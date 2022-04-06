@@ -13,6 +13,31 @@ type MockPostRepo struct {
 	mock.Mock
 }
 
+type MockPostSearchRepo struct {
+	mock.Mock
+}
+
+func (mock *MockPostSearchRepo) Search(keyword string) ([]models.Post, error) {
+	args := mock.Called(keyword)
+	result := args.Get(0)
+	return result.([]models.Post), args.Error(1)
+}
+
+func (mock *MockPostSearchRepo)	Index(post models.Post) error {
+	args := mock.Called(post)
+	return args.Error(0)
+}
+
+func (mock *MockPostSearchRepo)	Update(post models.Post) error {
+	args := mock.Called(post)
+	return args.Error(0)
+}
+
+func (mock *MockPostSearchRepo)	Delete(id string) error {
+	args := mock.Called(id)
+	return args.Error(0)
+}
+
 func (mock *MockPostRepo) Select() ([]models.Post, error) {
 	args := mock.Called()
 	result := args.Get(0)
@@ -29,9 +54,10 @@ func (mock *MockPostRepo) Update(post models.Post)	(error) {
 	return args.Error(0)
 }
 
-func (mock *MockPostRepo) Create(post models.Post) (error) {
+func (mock *MockPostRepo) Create(post models.Post) (models.Post, error) {
 	args := mock.Called(post)
-	return args.Error(1)
+	result := args.Get(0)
+	return result.(models.Post), args.Error(1)
 }
 
 func (mock *MockPostRepo) Find(id uint) (models.Post, error) {
@@ -42,6 +68,7 @@ func (mock *MockPostRepo) Find(id uint) (models.Post, error) {
 
 func TestGetListPost(t *testing.T) {
 	mockRepo := new(MockPostRepo)
+	mockSearchRepo := new(MockPostSearchRepo)
 	var listPost = []models.Post{
 		0: {
 			ID: 1,
@@ -60,7 +87,7 @@ func TestGetListPost(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		mockRepo.On("Select").Return(listPost, nil).Once()
 
-		postService := NewPostService(mockRepo)
+		postService := NewPostService(mockRepo, mockSearchRepo)
 		postList, err := postService.GetListPost()
 
 		mockRepo.AssertExpectations(t)
@@ -71,7 +98,7 @@ func TestGetListPost(t *testing.T) {
 	t.Run("Empty-postList", func(t *testing.T) {
 		mockRepo.On("Select").Return([]models.Post(nil), gorm.ErrRecordNotFound).Once()
 
-		postService := NewPostService(mockRepo)
+		postService := NewPostService(mockRepo, mockSearchRepo)
 		postList, err := postService.GetListPost()
 
 		mockRepo.AssertExpectations(t)
@@ -81,6 +108,7 @@ func TestGetListPost(t *testing.T) {
 }
 
 func TestCreatePost(t *testing.T) {
+	mockSearchRepo := new(MockPostSearchRepo)
 	mockRepo := new(MockPostRepo)
 	var post = models.Post{
 		ID: 1,
@@ -91,8 +119,9 @@ func TestCreatePost(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		mockRepo.On("Create", post).Return(post, nil).Once()
+		mockSearchRepo.On("Index", post).Return(nil).Once()
 
-		postService := NewPostService(mockRepo)
+		postService := NewPostService(mockRepo, mockSearchRepo)
 		result, err := postService.CreatePost(post)
 
 		mockRepo.AssertExpectations(t)
@@ -103,6 +132,7 @@ func TestCreatePost(t *testing.T) {
 
 func TestFindPost(t *testing.T) {
 	mockRepo := new(MockPostRepo)
+	mockSearchRepo := new(MockPostSearchRepo)
 	var (
 		post = models.Post{
 			ID: 10,
@@ -118,7 +148,7 @@ func TestFindPost(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		mockRepo.On("Find", id).Return(post, nil).Once()
 
-		postService := NewPostService(mockRepo)
+		postService := NewPostService(mockRepo, mockSearchRepo)
 		result, err := postService.Find(id)
 
 		mockRepo.AssertExpectations(t)
@@ -129,7 +159,7 @@ func TestFindPost(t *testing.T) {
 	t.Run("Does-not-exist-post", func(t *testing.T) {
 		mockRepo.On("Find", idFake).Return(models.Post{}, gorm.ErrRecordNotFound).Once()
 
-		postService := NewPostService(mockRepo)
+		postService := NewPostService(mockRepo, mockSearchRepo)
 		result, err := postService.Find(idFake)
 
 		mockRepo.AssertExpectations(t)
@@ -140,6 +170,7 @@ func TestFindPost(t *testing.T) {
 
 func TestDeletePost(t *testing.T) {
 	mockRepo := new(MockPostRepo)
+	mockSearchRepo := new(MockPostSearchRepo)
 	var (
 		post = models.Post{
 			ID: 7,
@@ -148,14 +179,16 @@ func TestDeletePost(t *testing.T) {
 			Content: "Posted by nangcuong",
 		}
 		id = uint(7)
+		idES = "7"
 		idFake = uint(14)
 	)
 
 	t.Run("Success", func(t *testing.T) {
 		mockRepo.On("Find", id).Return(post, nil).Once()
 		mockRepo.On("Delete", id).Return(nil).Once()
+		mockSearchRepo.On("Delete", idES).Return(nil).Once()
 
-		postService := NewPostService(mockRepo)
+		postService := NewPostService(mockRepo, mockSearchRepo)
 		err := postService.DeletePost(id)
 
 		mockRepo.AssertExpectations(t)
@@ -165,7 +198,7 @@ func TestDeletePost(t *testing.T) {
 	t.Run("Does-not-exist-post", func(t *testing.T) {
 		mockRepo.On("Find", idFake).Return(models.Post{}, gorm.ErrRecordNotFound).Once()
 
-		postService := NewPostService(mockRepo)
+		postService := NewPostService(mockRepo, mockSearchRepo)
 		err := postService.DeletePost(idFake)
 
 		mockRepo.AssertExpectations(t)
@@ -175,6 +208,7 @@ func TestDeletePost(t *testing.T) {
 
 func TestUpdatePost(t *testing.T) {
 	mockRepo := new(MockPostRepo)
+	mockSearchRepo := new(MockPostSearchRepo)
 	var (
 		id = uint(7)
 		idFake = uint(14)
@@ -196,8 +230,9 @@ func TestUpdatePost(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		mockRepo.On("Find", id).Return(postBF, nil).Once()
 		mockRepo.On("Update", postAF).Return(nil).Once()
+		mockSearchRepo.On("Update", postAF).Return(nil).Once()
 
-		postService := NewPostService(mockRepo)
+		postService := NewPostService(mockRepo, mockSearchRepo)
 		err := postService.UpdatePost(id, contentAfter)
 
 		mockRepo.AssertExpectations(t)
@@ -207,7 +242,7 @@ func TestUpdatePost(t *testing.T) {
 	t.Run("Does-not-exist-post", func(t *testing.T) {
 		mockRepo.On("Find", idFake).Return(models.Post{}, gorm.ErrRecordNotFound).Once()
 
-		postService := NewPostService(mockRepo)
+		postService := NewPostService(mockRepo, mockSearchRepo)
 		err := postService.UpdatePost(idFake, contentAfter)
 
 		mockRepo.AssertExpectations(t)
