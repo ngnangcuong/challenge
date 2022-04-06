@@ -37,8 +37,9 @@ func (p *postRepoImpl) Update(post models.Post)	(error) {
 	return result.Error
 }
 
-func (p *postRepoImpl) Create(post models.Post) error {
-	return p.DB.Create(&post).Error
+func (p *postRepoImpl) Create(post models.Post) (models.Post, error) {
+	result := p.DB.Create(&post)
+	return post, result.Error
 }
 
 func (p *postRepoImpl) Find(id uint) (models.Post, error) {

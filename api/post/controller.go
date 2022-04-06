@@ -55,8 +55,12 @@ func CreatePost(postService *usecase.PostService) func(c *gin.Context) {
 			Content: content,
 		}
 	
-		postService.CreatePost(post)
-		c.JSON(200, gin.H{
+		_, err := postService.CreatePost(post)
+		if err != nil {
+			c.JSON(500, err)
+		}
+
+		c.JSON(201, gin.H{
 			"message": "Create post successfully",
 		})
 	}
@@ -132,5 +136,18 @@ func DeletePost(postService *usecase.PostService) func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Delete post successfully",
 		})
+	}
+}
+
+func SearchPost(postService *usecase.PostService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		keyword := c.Param("keyword")
+		postList, err := postService.SearchPosts(keyword)
+		if err != nil {
+			c.JSON(500, err)
+			return
+		}
+
+		c.JSON(200, postList)
 	}
 }

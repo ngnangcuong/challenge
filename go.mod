@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/elastic/go-elasticsearch/v8 v8.1.0
 	github.com/getkin/kin-openapi v0.91.0
 	github.com/gin-gonic/gin v1.7.7
 	github.com/jinzhu/gorm v1.9.16
@@ -14,6 +15,7 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/elastic/elastic-transport-go/v8 v8.1.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect

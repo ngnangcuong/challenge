@@ -315,6 +315,35 @@ paths:
               schema:
                 $ref: '#/components/schemas/Response'
 
+  /post/search/{keyword}:
+    get:
+      description: Search list of post over keyword
+      parameters:
+        - in: path
+          name: keyword
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Find successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  properties:
+                    bodyPost:
+                      type: string
+                    userEmail:
+                      type: string
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+
 
 components:
   schemas:

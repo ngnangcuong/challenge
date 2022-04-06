@@ -9,6 +9,7 @@ import (
 	"challenge3/database"
 	"challenge3/middleware"
 	repo "challenge3/repository"
+	es "challenge3/repository/elasticsearch"
 	"challenge3/usecase"
 )
 
@@ -21,11 +22,14 @@ func InitRoute(router *gin.Engine) {
 	validator := NewOpenAPIMiddleware()
 
 	connection := database.GetDatabase()
+	esClient := database.GetESClient()
+
 	userRepo := repo.NewUserRepo(connection)
 	userService := usecase.NewUserService(userRepo)
 
 	postRepo := repo.NewPostRepo(connection)
-	postService := usecase.NewPostService(postRepo)
+	postSearchRepo := es.NewPostSearchRepo(esClient)
+	postService := usecase.NewPostService(postRepo, postSearchRepo)
 
 	roleRepo := repo.NewRoleRepo(connection)
 	roleService := usecase.NewRoleService(roleRepo)
@@ -55,6 +59,7 @@ func InitRoute(router *gin.Engine) {
 		postRoute.POST("/create", post.CreatePost(postService))
 		postRoute.DELETE("/delete/:postID", post.DeletePost(postService))
 		postRoute.PUT("/update/:postID", post.UpdatePost(postService))
+		postRoute.GET("/search/:keyword", post.SearchPost(postService))
 		postRoute.GET("/", post.GetListPost(postService))
 	}
 }

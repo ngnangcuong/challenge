@@ -16,6 +16,13 @@ type PostRepo interface {
 	Select() ([]Post, error)
 	Delete(id uint) (error)
 	Update(post Post)	(error)
-	Create(post Post) (error)
+	Create(post Post) (Post, error)
 	Find(id uint) (Post, error)
+}
+
+type PostSearchRepo interface {
+	Search(keyword string) ([]Post, error)
+	Index(post Post) error
+	Update(post Post) error
+	Delete(id string) error
 }
