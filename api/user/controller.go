@@ -16,7 +16,7 @@ var mySigningKey = "pa$$w0rd"
 
 func Response(c *gin.Context, code int, message string) {
 	c.JSON(code, gin.H{
-		"message": message,
+		"error": message,
 	})
 }
 
@@ -63,16 +63,22 @@ func LogIn(c *gin.Context) {
 	connection := database.GetDatabase()
 	userRepo := repo.NewUserRepo(connection)
 
-	email := c.PostForm("email")
-	password := c.PostForm("password")
+	var user models.Authen
 
-	userAuth, _ := userRepo.Find(email)
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(500, err)
+		return
+	}
+
+	// email := c.PostForm("email")
+	// password := c.PostForm("password")
+	userAuth, _ := userRepo.Find(user.Email)	
 	if userAuth.Email == "" {
 		Response(c, 200, "Not User")
 		return
 	}
 
-	if check := CheckPasswordHash(password, userAuth.Password); !check {
+	if check := CheckPasswordHash(user.Password, userAuth.Password); !check {
 		Response(c, 200, "Password is not correct")
 		return
 	} 
@@ -84,7 +90,9 @@ func LogIn(c *gin.Context) {
 	}
 
 	// c.SetCookie("token", tokenString, 150, "/", "localhost", false, true)
-	Response(c, 200, tokenString)
+	c.JSON(200, gin.H{
+		"token": tokenString,
+	})
 }
 
 func LogOut(c *gin.Context) {
@@ -94,10 +102,16 @@ func LogOut(c *gin.Context) {
 
 func Register(userService *usecase.UserService) func(c *gin.Context) {
 	return func(c *gin.Context) {
-	
-		email := c.PostForm("email")
-		name := c.PostForm("name")
-		password := c.PostForm("password")
+		var user models.User
+		if err := c.ShouldBindJSON(&user); err != nil {
+			c.JSON(500, err)
+			return
+		}
+
+		email := user.Email //c.PostForm("email")
+		name := user.Name //c.PostForm("name")
+		password := user.Password //c.PostForm("password")
+
 		hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	
 		if err != nil {
@@ -174,9 +188,16 @@ func UpdateUser(userService *usecase.UserService) func(c *gin.Context) {
 
 func NewRole(roleService *usecase.RoleService) func(c *gin.Context) {
 	return func(c *gin.Context) {
+
+		var role models.Role
+
+		if err := c.ShouldBindJSON(&role); err != nil {
+			c.JSON(500, err)
+			return
+		}
 	
-		name := c.PostForm("name")
-		permission := c.PostForm("permission")
+		name := role.Name //c.PostForm("name")
+		permission := role.Permission //c.PostForm("permission")
 	
 		// roleCheck, _ := roleService.Find(name)
 		

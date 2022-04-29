@@ -34,15 +34,20 @@ func InitRoute(router *gin.Engine) {
 	roleRepo := repo.NewRoleRepo(connection)
 	roleService := usecase.NewRoleService(roleRepo)
 
+	router.Use(middleware.SetupCors()) 
+
 	router.POST("/user/login", user.LogIn)
 	router.GET("/user/logout", user.LogOut)
 	router.POST("/user/register", user.Register(userService))
+	router.GET("/post", post.GetListPost(postService))
+	router.GET("/post/search/:keyword", post.SearchPost(postService))
 	
 	userRoute := router.Group("/user")
 	{
 		userRoute.Use(validator)
+		userRoute.Use(middleware.SetupCors()) 
 		userRoute.Use(middleware.Authorized())
-
+		
 		userRoute.POST("/create-user", middleware.NeedPermission("c"), user.CreateUser(userService))
 		userRoute.DELETE("/delete-user/:userEmail", middleware.NeedPermission("d"), user.DeleteUser(userService))
 		userRoute.PATCH("/update-user/:userEmail", middleware.NeedPermission("u"), user.UpdateUser(userService))
@@ -54,14 +59,16 @@ func InitRoute(router *gin.Engine) {
 	postRoute := router.Group("/post")
 	{
 		postRoute.Use(validator)
+		postRoute.Use(middleware.SetupCors()) 
 		postRoute.Use(middleware.Authorized())
-
+		
 		postRoute.POST("/create", post.CreatePost(postService))
 		postRoute.DELETE("/delete/:postID", post.DeletePost(postService))
 		postRoute.PUT("/update/:postID", post.UpdatePost(postService))
-		postRoute.GET("/search/:keyword", post.SearchPost(postService))
+		// postRoute.GET("/search/:keyword", post.SearchPost(postService))
 		postRoute.GET("/", post.GetListPost(postService))
 	}
+
 }
 
 func InitAPI() {
