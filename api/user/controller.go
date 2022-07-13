@@ -116,7 +116,9 @@ func LogIn(c *gin.Context) {
 		}
 
 		if success := r["success"]; success == "false" {
-			c.JSON(400, gin.H{})
+			c.JSON(400, gin.H{
+				"message": success,
+			})
 			return
 		}
 	}
