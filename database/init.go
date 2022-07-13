@@ -25,7 +25,7 @@ func GetDatabase() *gorm.DB {
 			dbname := "Challenge3"
 			db := "postgres"
 			dbpassword := "Cuongnguyen2001"
-			dburl := "postgres://postgres:" + dbpassword + "@localhost/" + dbname + "?sslmode=disable"
+			dburl := "postgres://postgres:" + dbpassword + "@challenge3/" + dbname + "?sslmode=disable"
 
 			connection, err := gorm.Open(db, dburl)
 

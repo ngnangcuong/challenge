@@ -1,14 +1,23 @@
 version: '3'
 services:
-  challenge3:
+  db:
+    container_name: challenge3
+    image: "postgres"
+    ports:
+      - "5431:5432"
+    environment:
+      # PGADMIN_DEFAULT_EMAIL: nangcuonga1k45@gmail.com
+      # PGADMIN_DEFAULT_PASSWORD: Cuongnguyen2001
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Cuongnguyen2001
+      POSTGRES_DB: Challenge3
+  backend:
+    # image: "challenge3:1.1"
     build: .
+    depends_on:
+      - db
     ports:
       - "3000:3000"
-  testpg:
-    image: dpage/pgadmin4
-    ports:
-      - "5432:5432"
     environment:
-      POSTGRES_DEFAULT_EMAIL: nangcuonga1k45@gmail.com
-      POSTGRES_DEFAULT_PASSWORD: Cuongnguyen2001
-      POSTGRES_HOST: testpg
+      HTTP_PROXY: http://192.168.5.8:3128
+      HTTPS_PROXY: http://192.168.5.8:3128
