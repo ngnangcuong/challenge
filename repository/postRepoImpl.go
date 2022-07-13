@@ -51,3 +51,13 @@ func (p *postRepoImpl) Find(id uint) (models.Post, error) {
 	}
 	return post, nil
 }
+
+func (p *postRepoImpl) FindByEmail(email string) ([]models.Post, error) {
+	var postList []models.Post
+	result := p.DB.Order("create_at desc").Where("email = ?", email).Find(&postList)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return postList, nil
+}

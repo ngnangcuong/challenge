@@ -34,11 +34,17 @@ func InitRoute(router *gin.Engine) {
 	roleRepo := repo.NewRoleRepo(connection)
 	roleService := usecase.NewRoleService(roleRepo)
 
+	resetPasswordRepo := repo.NewResetPasswordRepo(connection)
+	resetPasswordService := usecase.NewResetPasswordService(resetPasswordRepo)
+
 	router.Use(middleware.SetupCors()) 
 
 	router.POST("/user/login", user.LogIn)
 	router.GET("/user/logout", user.LogOut)
 	router.POST("/user/register", user.Register(userService))
+	router.PUT("/user/changePass", user.ChangePass(userService))
+	router.POST("/user/resetPassword", user.SendResetPassword(userService, resetPasswordService))
+	router.PUT("/user/resetPassword", user.ResetPassword(userService, resetPasswordService))
 	router.GET("/post", post.GetListPost(postService))
 	router.GET("/post/search/:keyword", post.SearchPost(postService))
 	
@@ -53,6 +59,8 @@ func InitRoute(router *gin.Engine) {
 		userRoute.PATCH("/update-user/:userEmail", middleware.NeedPermission("u"), user.UpdateUser(userService))
 		userRoute.PUT("/change-role", middleware.NeedRole("admin"), user.ChangeRole(userService, roleService))
 		userRoute.POST("/new-role", middleware.NeedRole("admin"), user.NewRole(roleService))
+		userRoute.GET("/me", user.GetMe(userService))
+		userRoute.GET("/:userEmail", user.GetUser(userService))
 		userRoute.GET("/", user.GetListUser(userService))
 	}
 
@@ -65,8 +73,10 @@ func InitRoute(router *gin.Engine) {
 		postRoute.POST("/create", post.CreatePost(postService))
 		postRoute.DELETE("/delete/:postID", post.DeletePost(postService))
 		postRoute.PUT("/update/:postID", post.UpdatePost(postService))
+		postRoute.GET("/user/:userEmail", post.FindPostByEmail(postService))
+		postRoute.GET("/:postId", post.GetPost(postService))
 		// postRoute.GET("/search/:keyword", post.SearchPost(postService))
-		postRoute.GET("/", post.GetListPost(postService))
+		// postRoute.GET("/", post.GetListPost(postService))
 	}
 
 }

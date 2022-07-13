@@ -18,6 +18,7 @@ type PostRepo interface {
 	Update(post Post)	(error)
 	Create(post Post) (Post, error)
 	Find(id uint) (Post, error)
+	FindByEmail(email string) ([]Post, error)
 }
 
 type PostSearchRepo interface {

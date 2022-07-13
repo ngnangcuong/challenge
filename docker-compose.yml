@@ -1,0 +1,14 @@
+version: '3'
+services:
+  challenge3:
+    build: .
+    ports:
+      - "3000:3000"
+  testpg:
+    image: dpage/pgadmin4
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DEFAULT_EMAIL: nangcuonga1k45@gmail.com
+      POSTGRES_DEFAULT_PASSWORD: Cuongnguyen2001
+      POSTGRES_HOST: testpg

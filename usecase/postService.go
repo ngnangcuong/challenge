@@ -3,6 +3,7 @@ package usecase
 import (
 	"challenge3/models"
 	"strconv"
+	"time"
 )
 
 type PostService struct {
@@ -27,10 +28,11 @@ func (p *PostService) CreatePost(post models.Post) (models.Post, error) {
 		return models.Post{}, err
 	}
 
+	postES.Create_At = time.Now()
 	err = p.search.Index(postES)
 	if err != nil {
 		return models.Post{}, err
-	}
+	}	
 
 	return postES, nil
 }
@@ -82,4 +84,8 @@ func (p *PostService) Find(id uint) (models.Post, error) {
 
 func (p *PostService) SearchPosts(keyword string) ([]models.Post, error) {
 	return p.search.Search(keyword)
+}
+
+func (p *PostService) FindByEmail(email string) ([]models.Post, error) {
+	return p.repo.FindByEmail(email)
 }

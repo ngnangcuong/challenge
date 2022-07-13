@@ -30,6 +30,7 @@ func GetDatabase() *gorm.DB {
 			connection, err := gorm.Open(db, dburl)
 
 			if err != nil {
+				fmt.Println(err.Error())
 				log.Fatalln("Wrong database url")
 			}
 
@@ -59,6 +60,8 @@ func InitMigration() {
 	connection.AutoMigrate(models.User{})
 	connection.AutoMigrate(models.Post{})
 	connection.AutoMigrate(models.Role{})
+	connection.AutoMigrate(models.CheckPass{})
+	connection.AutoMigrate(models.PasswordResetToken{})
 
 }
 

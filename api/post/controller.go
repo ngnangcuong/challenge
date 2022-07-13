@@ -5,6 +5,7 @@ import (
 
 	"flag"
 	"fmt"
+	"time"
 	"strconv"
 	"challenge3/models"
 	"challenge3/database"
@@ -26,7 +27,7 @@ func GetListPost(postService *usecase.PostService) func(c *gin.Context) {
 		}
 	
 		if page <= 0 {
-			c.JSON(200, gin.H{
+			c.JSON(400, gin.H{
 				"message": "Does not exsit page ",
 			})
 			return
@@ -35,7 +36,7 @@ func GetListPost(postService *usecase.PostService) func(c *gin.Context) {
 		var postList []models.Post
 		var offset = (page - 1) *10
 		
-		connection.Limit(10).Offset(offset).Find(&postList)
+		connection.Order("create_at desc").Limit(10).Offset(offset).Find(&postList)
 		
 		c.JSON(200, postList)
 	}
@@ -48,21 +49,28 @@ func CreatePost(postService *usecase.PostService) func(c *gin.Context) {
 		userID := c.MustGet("userID")
 		email := c.MustGet("email")
 	
-		content := c.PostForm("content")
-		var post = models.Post{
-			UserID: uint(userID.(float64)),
-			Email: email.(string),
-			Content: content,
+		// content := c.PostForm("content")
+		var post models.Post
+		if err := c.ShouldBindJSON(&post); err != nil {
+			c.JSON(400, err.Error())
+			return
 		}
+		// var post = models.Post{
+		// 	UserID: uint(userID.(float64)),
+		// 	Email: email.(string),
+		// 	Content: content.content,
+		// 	Create_At: time.Now(),
+		// }
+		post.UserID = uint(userID.(float64))
+		post.Email = email.(string)
+		post.Create_At = time.Now()
 	
-		_, err := postService.CreatePost(post)
+		newPost, err := postService.CreatePost(post)
 		if err != nil {
 			c.JSON(500, err)
 		}
 
-		c.JSON(201, gin.H{
-			"message": "Create post successfully",
-		})
+		c.JSON(201, newPost)
 	}
 }
 
@@ -83,7 +91,7 @@ func UpdatePost(postService *usecase.PostService) func(c *gin.Context) {
 	
 		postCheck, err := postService.Find(uint(postID))
 		if err != nil {
-			c.JSON(200, gin.H{
+			c.JSON(400, gin.H{
 				"message": "Does not exist post",
 			})
 			return
@@ -96,12 +104,16 @@ func UpdatePost(postService *usecase.PostService) func(c *gin.Context) {
 			return
 		}
 	
-		content := c.PostForm("content")
-		postService.UpdatePost(postCheck.ID, content)
+		// content := c.PostForm("content")
+		var newPost models.Post
+		err = c.ShouldBindJSON(&newPost)
+		if err != nil {
+			c.JSON(400, err.Error())
+			return
+		}
+		postService.UpdatePost(postCheck.ID, newPost.Content)
 	
-		c.JSON(200, gin.H{
-			"message": "Edit post successfully",
-		})
+		c.JSON(204, gin.H{})
 	}
 }
 
@@ -119,7 +131,7 @@ func DeletePost(postService *usecase.PostService) func(c *gin.Context) {
 
 		postCheck, err := postService.Find(uint(postID))
 		if err != nil {
-			c.JSON(200, gin.H{
+			c.JSON(400, gin.H{
 				"message": "Does not exist post",
 			})
 			return
@@ -133,9 +145,7 @@ func DeletePost(postService *usecase.PostService) func(c *gin.Context) {
 		}
 	
 		postService.DeletePost(uint(postID))
-		c.JSON(200, gin.H{
-			"message": "Delete post successfully",
-		})
+		c.JSON(204, gin.H{})
 	}
 }
 
@@ -145,6 +155,39 @@ func SearchPost(postService *usecase.PostService) gin.HandlerFunc {
 		postList, err := postService.SearchPosts(keyword)
 		if err != nil {
 			c.JSON(500, err)
+			return
+		}
+
+		c.JSON(200, postList)
+	}
+}
+
+func GetPost(postService *usecase.PostService) gin.HandlerFunc {
+	return func (c *gin.Context) {
+		id := c.Param("postId")
+		postId, err := strconv.ParseUint(id, 10, 32)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+
+		post, err := postService.Find(uint(postId))
+		if err != nil {
+			c.JSON(400, err.Error())
+			return
+		}
+
+		c.JSON(200, post)
+	}
+}
+
+func FindPostByEmail(postService *usecase.PostService) gin.HandlerFunc {
+	return func (c *gin.Context) {
+		userEmail := c.Param("userEmail")
+		postList, err := postService.FindByEmail(userEmail)
+
+		if err != nil {
+			c.JSON(400, err.Error())
 			return
 		}
 

@@ -84,6 +84,48 @@ paths:
               schema:
                 $ref: '#/components/schemas/Response'
   
+  /user/me:
+    get:
+      description: Get info of logged in user
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+
+  /user/{userEmail}:
+    get:
+      description: Get info of individual user
+      parameters:
+        - in: path
+          name: userEmail
+          description: email of user
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: operation successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        
+        400:
+          description: User is not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+
   /user/create-user:
     post:
       description: 'Create a new user'
@@ -245,6 +287,60 @@ paths:
                     userName:
                       type: string
 
+  /post/{postId}:
+    get:
+      description: Get post by id
+      parameters:
+        - in: path
+          name: postId
+          description: post's id
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        400:
+          description: does not exist post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+
+  /post/user/{userEmail}:
+    get:
+      description: Get list of posts belong to user
+      parameters:
+        - in: path
+          name: userEmail
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: get successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  properties:
+                    bodyPost:
+                      type: string
+                    userName:
+                      type: string
+        400:
+          description: bad request (not exist user)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+
   /post/create:
     post:
       description: Create a new post
@@ -383,6 +479,14 @@ components:
           type: string
           example: cuong123
     
+    Post:
+      type: object
+      properties:
+        bodyPost:
+          type: string
+        userEmail:
+          type: string
+
     UpdateUserRequest:
       type: object
       properties:
