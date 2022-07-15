@@ -22,7 +22,7 @@ func GetESClient() *elasticsearch.Client {
 
 		if esClient == nil {
 			cfg := elasticsearch.Config{
-				Addresses: []string{"http://localhost:9200", },
+				Addresses: []string{"http://localhost:9200" ,"http://es_client:9200", },
 				Username: username,
 				Password: password,
 			}
